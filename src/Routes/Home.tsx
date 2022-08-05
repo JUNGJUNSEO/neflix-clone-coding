@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useViewportScroll } from "framer-motion";
 import { useState } from "react";
 import styled from "styled-components";
 import { getMovie, IGetMoviesResult } from "../api"
 import { makeImagePath } from "../utils";
-
+import { useMatch, useNavigate } from "react-router-dom";
 
 const Wrapper = styled.div`
   background: black;
@@ -57,6 +57,7 @@ const Box = styled(motion.div)<{bgPhoto: string}>`
   height: 200px;
   color: red;
   font-size: 66px;
+  cursor: pointer;
   &:first-child {
     transform-origin: center left;
   }
@@ -77,16 +78,35 @@ const Info = styled(motion.div)`
   }
 `;
 
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+
+`;
+
+const BigMovie = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 80vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  background-color: orange;
+`;
+
 const rowVariants = {
   hidden: {
     x: window.outerWidth + 5,
-  },
+  },//initial
   visible: {
     x: 0,
-  },
+  },//animate
   exit: {
     x: -window.outerWidth - 5,
-  },
+  },//exit
 };
 
 
@@ -118,6 +138,9 @@ const infoVariants = {
 const offset = 6;
 
 function Home() {
+    const navigate = useNavigate();
+    const movieMatch = useMatch("/movies/:movieId");
+    const {scrollY} = useViewportScroll();
     const {data, isLoading} = useQuery<IGetMoviesResult>(["movie", "nowPlaying"], getMovie)
     const [index, setIndex] = useState(0);
     const [leaving, setLeaving] = useState(false);
@@ -131,6 +154,12 @@ function Home() {
       } 
     };
     const toggleLeaving = () => {setLeaving((prev) => !prev)};
+    const onBoxClicked = (movieId:number) =>{
+      navigate(`/movies/${movieId}`);
+    };
+    const onOverlayClick = () => {
+      navigate("/")
+    }
     return (
         <Wrapper>
             {isLoading ? (
@@ -147,23 +176,26 @@ function Home() {
                   <Slider>
                     <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
                       <Row
+                        key={index}
                         variants={rowVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
                         transition={{ type: "tween", duration: 1 }}
-                        key={index}
                       >
                         {data?.results
                           .slice(1)
                           .slice(offset * index, offset * index + offset)
                           .map((movie => 
-                            <Box key={movie.id}
+                            <Box 
+                              key={movie.id}
+                              layoutId={movie.id+""}
                               variants={boxVariants}
                               initial="normal"
                               whileHover="hover"
                               transition={{type:"tween"}}
                               bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
+                              onClick={()=>onBoxClicked(movie.id)}
                               >
                                 <Info variants={infoVariants}>
                                   <h4>{movie.title}</h4>
@@ -172,6 +204,19 @@ function Home() {
                       </Row>
                     </AnimatePresence>
                   </Slider>
+                  <AnimatePresence>
+                   
+                    {movieMatch ? (
+                       <>
+                        <Overlay onClick={onOverlayClick} exit={{ opacity: 0 }} animate={{ opacity: 1 }}/>
+                        <BigMovie
+                          layoutId={movieMatch.params.movieId}
+                          style={{top: scrollY.get()+100}}
+                        />
+                       </>
+                      
+                    ):null}
+                  </AnimatePresence>
                 </>
                   )
             }
@@ -180,3 +225,4 @@ function Home() {
 }
 
 export default Home
+
