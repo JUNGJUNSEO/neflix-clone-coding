@@ -1,19 +1,18 @@
 import styled from "styled-components";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { IMovie, getMovie, IGetMoviesResult } from "../api";
+import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
+import {IGetMoviesResult } from "../api";
 import { useMatch, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { makeImagePath } from "../utils";
 import Movie from "./Movie";
-import { Loader } from "../components/Loader";
+
 
 const Wrapper = styled.div`
   position: relative;
   background-color: rgba(0, 0, 0, 0.9);
-  height: 120vh;
+  height: 60vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -23,7 +22,7 @@ const Row = styled(motion.div)`
   position: absolute;
   width: 100%;
   display: grid;
-  gap: 10px;
+  gap:30px;
   grid-template-columns: repeat(6, 1fr);
   height: 400px;
 `;
@@ -55,13 +54,13 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
 
 const rowVariants = {
   hidden: (direction: number) => ({
-    x: direction > 0 ? window.outerWidth + 10 : -window.outerWidth - 10
+    x: direction > 0 ? window.outerWidth + 30 : -window.outerWidth - 30
   }), //initial
   visible: {
     x: 0
   }, //animate
   exit: (direction: number) => ({
-    x: direction > 0 ? -window.outerWidth - 10 : window.outerWidth + 10
+    x: direction > 0 ? -window.outerWidth - 30 : window.outerWidth + 30
   }) //exit
 };
 
@@ -81,22 +80,20 @@ const boxVariants = {
 
 const offset = 6;
 
-interface aa {
-  page:string;
+interface ISliderProps {
+  data?: IGetMoviesResult;
+  id: string;
 }
 
-function Slider() {
-    console.log(data)
+function Slider({data, id}: ISliderProps) {
+  
 
     const navigate = useNavigate();
     const movieMatch = useMatch("/movies/:movieId");
-    const { data: movieData, isLoading: movieLoading } = useQuery<
-        IGetMoviesResult
-    >(["movie", "nowPlaying"], getMovie);
     const [[index, direction], setIndex] = useState([0, 0]);
     const [leaving, setLeaving] = useState(false);
 
-    const maxIndex = Math.floor((movieData?.results.length || 0) / offset) - 1;
+    const maxIndex = Math.floor((data?.results.length || 0) / offset) - 1;
     const toggleLeaving = () => {
         setLeaving((prev) => !prev);
     };
@@ -113,68 +110,65 @@ function Slider() {
     };
 
     return (
-        <>
-        {movieLoading ? (
-            <Loader>loading...</Loader>
-        ) : (
-            <>
-                <AnimatePresence
-                  initial={false}
-                  onExitComplete={toggleLeaving}
-                  custom={direction}
-                >
-                <Row
-                  key={index}
-                  custom={direction}
-                  variants={rowVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  transition={{
-                  type: "tween",
-                  duration: 3
-                  }}
-                >
-                    {movieData?.results
-                    .slice(offset * index, offset * index + offset)
-                    .map((movie) => (
-                        <Box
-                          key={movie.id}
-                          layoutId={movie.id + ""}
-                          variants={boxVariants}
-                          initial="normal"
-                          whileHover="hover"
-                          transition={{ type: "tween" }}
-                          bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
-                          onClick={() => onBoxClicked(movie.id)}
-                        ></Box>
-                    ))}
-                </Row>
-                </AnimatePresence>
-                {index === 0 ? null : (
-                <Button
-                  onClick={() => onClick(-1)}
-                  style={{
-                  left: 0,
-                  background:
-                      "linear-gradient(90deg, rgba(0,0,0,0.5), rgba(0,0,0,0.1))"
-                  }}
-                >
-                    <FontAwesomeIcon icon={faAngleLeft} />
-                </Button>
-                )}
-                {index === maxIndex ? null : (
-                <Button onClick={() => onClick(1)} style={{ right: 0 }}>
-                  <FontAwesomeIcon icon={faAngleRight} />
-                </Button>
-                )}
-            
-            {movieMatch ? (
-                <Movie movieId={movieMatch.params.movieId || ""} />
-            ) : null}
-            </>
-        )}
-        </>
+      <LayoutGroup id={id} >
+        
+        <Wrapper>
+          {id}
+          <AnimatePresence
+            initial={false}
+            onExitComplete={toggleLeaving}
+            custom={direction}
+          >
+            <Row
+              key={index}
+              custom={direction}
+              variants={rowVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{
+              type: "tween",
+              duration: 3
+              }}
+            >
+                {data?.results
+                .slice(offset * index, offset * index + offset)
+                .map((movie) => (
+                    <Box
+                      key={movie.id}
+                      layoutId={movie.id + ""}
+                      variants={boxVariants}
+                      initial="normal"
+                      whileHover="hover"
+                      transition={{ type: "tween" }}
+                      bgPhoto={makeImagePath(movie.backdrop_path, "w500")}
+                      onClick={() => onBoxClicked(movie.id)}
+                    ></Box>
+                ))}
+            </Row>
+          </AnimatePresence>
+          {index === 0 ? null : (
+          <Button
+            onClick={() => onClick(-1)}
+            style={{
+            left: 0,
+            background:
+                "linear-gradient(90deg, rgba(0,0,0,0.5), rgba(0,0,0,0.1))"
+            }}
+          >
+            <FontAwesomeIcon icon={faAngleLeft} />
+          </Button>
+          )}
+          {index === maxIndex ? null : (
+          <Button onClick={() => onClick(1)} style={{ right: 0 }}>
+            <FontAwesomeIcon icon={faAngleRight} />
+          </Button>
+          )}
+        </Wrapper>  
+    {movieMatch ? (
+        <Movie movieId={movieMatch.params.movieId || ""} />
+    ) : null}
+  </LayoutGroup>
     );
 }
 
