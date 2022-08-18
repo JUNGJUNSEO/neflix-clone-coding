@@ -58,9 +58,9 @@ function Home() {
                     <Overview>{nowPlaying?.results[0].overview}</Overview>
                   </Banner>
                   <Movies>
-                    <Slider data={nowPlaying} id="nowPlaying"/>
-                    <Slider data={upcoming} id="upcoming"/>
-                    <Slider data={TopRated} id="topRated"/>
+                    <Slider data={nowPlaying} id="Now Playing"/>
+                    <Slider data={upcoming} id="Upcoming"/>
+                    <Slider data={TopRated} id="Top-Rated"/>
                   </Movies>
                   
                   
