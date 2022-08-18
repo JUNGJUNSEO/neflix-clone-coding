@@ -122,7 +122,7 @@ export default function Movie({ movieId }: movieProps) {
   const onOverlayClick = () => {
     navigate("/");
   };
-
+  console.log(scrollY.get())
   return (
     <>
       <AnimatePresence>
