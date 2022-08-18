@@ -11,11 +11,13 @@ import Movie from "./Movie";
 
 const Wrapper = styled.div`
   position: relative;
-  background-color: rgba(0, 0, 0, 0.9);
-  height: 60vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 70vh;
+`;
+
+const Subject = styled.h1`
+  font-size: 33px;
+  font-weight: 600;
+  margin:20px;
 `;
 
 const Row = styled(motion.div)`
@@ -50,6 +52,7 @@ const Box = styled(motion.div)<{ bgPhoto: string }>`
   &:last-child {
     transform-origin: center right;
   }
+  border-radius: 10px;
 `;
 
 const rowVariants = {
@@ -113,7 +116,8 @@ function Slider({data, id}: ISliderProps) {
       <LayoutGroup id={id} >
         
         <Wrapper>
-          {id}
+          <Subject>{id}</Subject>
+          
           <AnimatePresence
             initial={false}
             onExitComplete={toggleLeaving}
