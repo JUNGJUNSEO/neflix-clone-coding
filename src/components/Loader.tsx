@@ -1,9 +1,12 @@
 import styled from "styled-components";
 
 export const Loader = styled.div`
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: white;
+  height: 100%;
+  font-size: 36px;
+  font-weight: 600;
+  color: white;
+  background-color: lightslategray;
 `;
