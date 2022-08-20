@@ -134,7 +134,7 @@ export default function Movie({ movieId }: movieProps) {
       </AnimatePresence>
       <BigMovie layoutId={movieId} style={{ top: scrollY.get() + 40 }}>
         {detailLoading && creditsLoading ? (
-          <Loader></Loader>
+          <Loader>Loading...</Loader>
         ) : (
           movieDetail &&
           movieCredits && (
